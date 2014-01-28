@@ -13,11 +13,10 @@ $(document).ready(function () {
         var countryIso = {}
 
         // build lookup table from source data
-        $(countryIsoSource['CountriesDefinition']).each( function(country) {
-            console.log(country.EngLabel);
-            countryIso[country.EngLabel] = country.Abbr
+        $(countryIsoSource['CountriesDefinition']).each( function(i,country) {
+            countryIso[country.EngLabel] = country.Abbr;
         });
-
+        
 	var now = new Date();
 	var thisYear = now.getFullYear();
 
@@ -53,8 +52,6 @@ $(document).ready(function () {
             done: function(datamap) {
                 datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
                     console.dir(geography.properties.name);
-                    console.dir(countryIso)
-                    console.dir(countryIsoSource)
                     console.log(countryIso[geography.properties.name])
                 })
             }
