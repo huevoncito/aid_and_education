@@ -17,6 +17,7 @@
   <meta property="og:description" content="" />
   
   <!-- FavIcons -->
+  <link rel="stylesheet" type="text/css" href="fonts/stylesheet.css">
   <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
   <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -25,6 +26,7 @@
   <!-- <link rel="stylesheet" type="text/css" href="css/slider.css"> -->
   <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 
+
   <link href="" rel="apple-touch-icon">
   <link href="" rel="apple-touch-icon" sizes="72x72">
   <link href="" rel="apple-touch-icon" sizes="114x114">
@@ -32,44 +34,37 @@
   <!-- /FavIcons -->
 </head>
 <body>
-  <nav class="navbar navbar-default" role="navigation">
-  <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="#">Education &amp; Aid Flows</a>
+  <section class='container'>
+  <div class='row'>
+    <div class='col-md-6'>
+      <h1 id='mainTitle'>Education: Aid + Indicators</h1>
     </div>
+  </div>
+  </section>
+  
+      <!-- Instructions -->
+      <div id='step1' class='step'>
+        Click a country - any country
+      </div>
+      <div id='step2' class='step' style='display: none'>
+        Pick an indicator
+      </div>
+      <div id='step3' class='step' style='display: none'>
+        Apply a filter
+      </div>
+      <div id='step4' class='step' style='display: none'>
+        View progress
+      </div>
+      <!-- // Instructions -->
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#">About</a></li>
-        <!-- <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
-          <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-          </ul>
-        </li> -->
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </nav>
 
   <section class='container'>
     <div class='row'>
-      <div class='col-md-9' id='mapHolder'>
-       
+      <div class='col-md-9' id='mapHolder'> 
       </div>
-      <div class='col-md-3' id='indicatorSelect' style='display: block'>
+      <div class='col-md-3' id='indicatorSelect' style='display:none'>
         
-          <select class='form-control col-md-12' id='filterIndicator'>
+          <select class='form-control col-md-12' id='filterIndicator' >
             <option value=''></option>
             <option value='GER-0'>Gross Enrolment Ratio in pre-primary education</option>
             <option value='NERA_1_CP'>Adjusted Net enrolment ratio in primary education</option>
@@ -88,16 +83,17 @@
             <option value='ROFST_2_CP'>Rate of out-of-school children of adolescents of lower secondary school age</option>
           </select>
           <br>
-          <span id='indicator-range'>0% - 100%</span>
-          <div id="vertical-slider" style="height:350px;">
-          </div>
-          
+          <div id='rangeSelector' style='display:none'>
+            <span id='indicator-range'>0% - 100%</span>
+            <div id="vertical-slider" style="height:350px;">
+            </div>
+          </div>    
       </div>
     </div>
     <div class='row'>
       <div class='col-md-9'>
         <div id='active-year'>Year: 2000</div>
-        <div id='time-slider' style='display:block'>
+        <div id='time-slider' style='display:none'>
 
         </div>
       </div>

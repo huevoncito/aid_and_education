@@ -1,12 +1,10 @@
 $(document).ready(function () {
 	
+	// make sure we don't show instructions twice
+	var instructionsViewed = [];
+
 	var now = new Date();
 	var thisYear = now.getFullYear();
-
-	$('#filterIndicator').select2({
-		placeholder: 'Select an indicator',
-		allowClear: true
-	});
 
 	$( "#vertical-slider" ).slider({
       orientation: "vertical",
@@ -14,19 +12,52 @@ $(document).ready(function () {
       values: [ 0, 100 ], // need to softcode for values over 100
       slide: function ( event, ui ) {
       	$('#indicator-range').text ( ui.values[0] + '%' + ' - ' + ui.values[1] + '%');
+      	//toggle year view and instructions
+      	$('#step3').fadeOut();
+      	if ( instructionsViewed.indexOf('#step4') === -1 ) {
+			$('#step4').fadeIn('slow');
+			instructionsViewed.push('#step4');
+		}
+		$('#active-year').fadeIn('slow');
+      	$('#time-slider').slider({
+			min: 2000,
+	      	max: thisYear,
+	      	step: 1,
+	      	slide: function( event, ui ) {
+	        	$( "#active-year" ).text( "Year: " + ui.value );
+	        	$('#step4').fadeOut('slow');
+	      }
+		}).fadeIn('slow');
       }
     });
 
-	$('#time-slider').slider({
-		min: 2000,
-      	max: thisYear,
-      	step: 1,
-      	slide: function( event, ui ) {
-        	$( "#active-year" ).text( "Year: " + ui.value );
-      }
+	var map = new Datamap({element: document.getElementById('mapHolder')});
+
+	//toggle instructions as needed
+	$('.datamaps-subunit').on('click', function (e) {
+		//hide step 1 & show step 2;
+		$('#step1').fadeOut();
+		if ( instructionsViewed.indexOf('#step2') === -1 ) {
+			$('#step2').fadeIn('slow');
+			instructionsViewed.push('#step2');
+		}
+		$('#indicatorSelect').fadeIn('slow', function () {
+			$('#filterIndicator').select2({
+				placeholder: 'Select an indicator',
+				allowClear: true
+			});
+		})
+		//handle event
 	});
 
-	var map = new Datamap({element: document.getElementById('mapHolder')});
+	$('#indicatorSelect').on('change', function (e) {
+		$('#step2').fadeOut();
+		if ( instructionsViewed.indexOf('#step3') === -1 ) {
+			$('#step3').fadeIn('slow');
+			instructionsViewed.push('#step3');
+		}
+		$('#rangeSelector').fadeIn('slow');
+	})
 
 })
 

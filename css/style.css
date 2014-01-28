@@ -1,5 +1,6 @@
 @import url(http://fonts.googleapis.com/css?family=Lato:300);
 
+
 body, h1 {
 	font-family: 'Lato', "Helvitca Neue" sans-serif;
 }
@@ -25,8 +26,36 @@ body, h1 {
 #active-year {
 	margin-top: -50px;
 	text-align: center;
+	display: none;
 }
 
 #time-slider .ui-slider-range { 
 	background: steelblue;
+}
+
+.step {
+	font-family: 'mission_gothicthin_italic', sans-serif;
+	font-size: 2em;
+	color: grey;
+	position: absolute;
+}
+
+#step1 {
+	left: 33%;
+	top: 90px;
+}
+
+#step2 {
+	top: 63px;
+	right: 30%;
+}
+
+#step3 {
+	top: 249px;
+	right: 18%;
+}
+
+#step4 {
+	bottom: 60px;
+	left: 32%;
 }
