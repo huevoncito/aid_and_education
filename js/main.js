@@ -32,7 +32,6 @@ $(document).ready(function () {
     });
 
 	var map = new Datamap({element: document.getElementById('mapHolder')});
-
 	//toggle instructions as needed
 	$('.datamaps-subunit').on('click', function (e) {
 		//hide step 1 & show step 2;
@@ -41,12 +40,11 @@ $(document).ready(function () {
 			$('#step2').fadeIn('slow');
 			instructionsViewed.push('#step2');
 		}
-		$('#indicatorSelect').fadeIn('slow', function () {
-			$('#filterIndicator').select2({
-				placeholder: 'Select an indicator',
-				allowClear: true
-			});
+		$('#filterIndicator').select2({
+			placeholder: 'Select an indicator',
+			allowClear: true
 		})
+		$('#indicatorSelect').fadeIn('slow');
 		//handle event
 	});
 
