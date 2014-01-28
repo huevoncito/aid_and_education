@@ -3,8 +3,25 @@ $(document).ready(function () {
 	// make sure we don't show instructions twice
 	var instructionsViewed = [];
 
+        // lookup of flow data keyed by year/country
+        var flowData = {'in':{},'out':{}}
+
+        // lat/long lookup by country code
+        var countryGps = {}
+
+        // 3166-3 to english country name. cross your fingers. Thank Chrome's CORS implementation for this
+        var countryIso = {}
+
+        // build lookup table from source data
+        $(countryIsoSource['CountriesDefinition']).each( function(country) {
+            console.log(country.EngLabel);
+            countryIso[country.EngLabel] = country.Abbr
+        });
+
 	var now = new Date();
 	var thisYear = now.getFullYear();
+
+        circles = $('svg').append('svg:g').attr('id','circles');
 
 	$( "#vertical-slider" ).slider({
       orientation: "vertical",
@@ -31,7 +48,17 @@ $(document).ready(function () {
       }
     });
 
-	var map = new Datamap({element: document.getElementById('mapHolder')});
+	var map = new Datamap({
+            element: document.getElementById('mapHolder'),
+            done: function(datamap) {
+                datamap.svg.selectAll('.datamaps-subunit').on('click', function(geography) {
+                    console.dir(geography.properties.name);
+                    console.dir(countryIso)
+                    console.dir(countryIsoSource)
+                    console.log(countryIso[geography.properties.name])
+                })
+            }
+        });
 	//toggle instructions as needed
 	$('.datamaps-subunit').on('click', function (e) {
 		//hide step 1 & show step 2;
@@ -49,14 +76,34 @@ $(document).ready(function () {
 	});
 
 	$('#indicatorSelect').on('change', function (e) {
+                // know enough to display circle data now ...               
+                circles.selectAll('circle')
+                    .data(flowData.in) // where is in/out selected?
+                    .enter().append("svg:circle")
+                    .attr("cx", function(d, i) { return countryGps[i][0]; })
+                    .attr("cy", function(d, i) { return countryGps[i][1]; })
+                    .attr("r", function(d, i) { return Math.sqrt(countByAirport[d.iata]); })
+                    .sort(function(a, b) { return countByAirport[b.iata] - countByAirport[a.iata]; });
+
 		$('#step2').fadeOut();
 		if ( instructionsViewed.indexOf('#step3') === -1 ) {
 			$('#step3').fadeIn('slow');
 			instructionsViewed.push('#step3');
 		}
 		$('#rangeSelector').fadeIn('slow');
-	})
+	});
 
+        //d3.json('countries.json', function(error,data) {
+        //    if (error) return console.warn(error);
+        //    $(data.CountriesDefinition).each( function(country) {
+        //        countryIso[country.EngLabel] = country.Abbr
+        //    });
+        //});
+
+        d3.csv('flows.csv', function(flow) {
+            flowData.in[flow.year+'|'+flow.country_in] = flow
+            flowData.out[flow.year+'|'+flow.country_out] = flow
+        });
 })
 
 //- Gross enrollment ratios (all) 100% - 120% == overage students, afterwards, 10% intervals down
