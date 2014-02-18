@@ -1,8 +1,15 @@
 $(document).ready(function () {
-	
+	//colours
+    successColour = 'green';
+    warningColour = 'gold';
+    dangerColour = 'red';
+
     var now = new Date();
     var thisYear = now.getFullYear();
     var countriesShown = [];
+    var dataSet;
+    var activeCountry;
+    var activeIndicator;
 
 	// make sure we don't show instructions twice
 	var instructionsViewed = [];
@@ -47,8 +54,6 @@ $(document).ready(function () {
       }
     });
 
-   var activeCountry;
-
 	var map = new Datamap({
             element: document.getElementById('mapHolder'),
             done: function(datamap) {
@@ -68,7 +73,7 @@ $(document).ready(function () {
                     //get country flow information
                     activeCountry = countryIso[geography.properties.name];
 
-                    var dataSet = flowData.in;
+                    dataSet = flowData.in;
                     if (!flowData.in[activeCountry]) {
                         dataSet = flowData.out;
                     }
@@ -117,7 +122,7 @@ $(document).ready(function () {
 
     $('.datamaps-subunit').fadeIn('slow', function () {
         console.log('all shown');
-        console.log(countryIso);
+        // console.log(countryIso);
         $.each(countryIso, function (i, country) {
             if (countriesShown.indexOf(country) != -1) {
                 var hideClass = '.' + country;
@@ -130,23 +135,123 @@ $(document).ready(function () {
 
 
 	$('#indicatorSelect').on('change', function (e) {
-        console.log(e.val);
-   
+        activeIndicator = e.val;    
 		$('#step2').fadeOut();
 		if ( instructionsViewed.indexOf('#step3') === -1 ) {
 			// $('#step3').fadeIn('slow');
 			instructionsViewed.push('#step3');
 		}
 		//$('#rangeSelector').fadeIn('slow');
-        d3.json("http://132.204.46.17:83/api/countries/?code=" + 'SEN' + "&category=EDULIT_DS&indicators=" +  e.val + "&fromyear=" + 2008 + "&toyear=" + 2009 + "&mostrecent=false", function (jsondata) {
-            var indi = jsondata.Indicators[0];
-            console.log(indi);
-            if (!indi) {
-                $('#queryResult').text('No data :-(');
+        $.each($('.datamaps-bubble'), function (i, bubble) {
+            //only trigger click even for countries that have Flow data
+            if ( parseFloat( $(bubble).attr('r') ) > 0 ) {
+                
+                // $(document.getElementsByClassName('datamaps-bubble')[i]).click()
+                colourBubble( $(bubble) )
+                // $(bubble).click();
             }
-            $('#queryResult').text('Country: ' + indi.Country + ', Indicator: ' + $('#indicatorSelect').find('option[value="'+indi.Indicator+'"]').text()  + ', Value: ' + indi.Value);
         });
-	});
+    })
+
+    //colour bubbles
+    
+    function colourBubble (bubble) {
+        var trigger = bubble;
+        var bubbleInfo = JSON.parse(trigger.attr('data-info'));
+        var country = bubbleInfo['name'];
+        var indicator = activeIndicator;
+
+        $.getJSON("http://132.204.46.17:83/api/countries/?code=" + country + "&category=EDULIT_DS&indicators=" +  indicator + "&fromyear=" + 2008 + "&toyear=" + 2009 + "&mostrecent=false&callback=? ", function (jsondata) {
+            console.log(jsondata);
+        });
+        return;
+
+
+        d3.jsonp("http://132.204.46.17:83/api/countries/?code=" + country + "&category=EDULIT_DS&indicators=" +  indicator + "&fromyear=" + 2008 + "&toyear=" + 2009 + "&mostrecent=false&callback=d3.jsonp.dataReturned", function (d) {    
+            // console.log(d3.jsonp.data);
+            if (!d) {
+                console.log('No data for ' + country);
+                return;
+            }
+            var indi = d.Indicators[d.Indicators.length - 1]; // get most recent
+            
+            if (!indi) {
+                console.log('No data for ' + country);
+                return;
+            }
+            //colour code the bubbles
+            switch ( indi.Indicator ) {
+                case 'GER_0': //- Gross enrollment ratios (all) 100% - 120% == overage students, afterwards, 10% intervals down to 50%. Below 50% is all red
+                case 'GER_1':
+                case 'GER_12':
+                case 'GER_23':
+                    if ( indi.Value >= 100 ) {
+                        trigger.css('fill', successColour);
+                    } else if (indi.Value < 100 && indi.Value >= 50 ) {
+                        trigger.css('fill', warningColour);
+                    } else {
+                        trigger.css('fill', dangerColour);
+                    }
+                    break;
+                case 'NERA_1_CP': //- Adjusted net enrollment 97-100 == great, everyone enrolled. 90 - 96 = yellow, 10% intervals doen to 50%
+                    if ( indi.Value >= 97 ) {
+                        findCountry(indi.Country).css('fill', successColour);
+                    } else if (indi.Value < 97 && indi.Value >= 90 ) {
+                        findCountry(indi.Country).css('fill', warningColour);
+                    } else {
+                        findCountry(indi.Country).css('fill', dangerColour);
+                    }
+                    break;
+                case 'LR_AG15T24':
+                case 'LR_AG15T99': ////-literacy for adult and youth. %90-100, 10%increments down, 50 & Below
+                    if ( indi.Value >= 90 ) {
+                        findCountry(indi.Country).css('fill', successColour);
+                    } else if (indi.Value < 90 && indi.Value >= 50 ) {
+                        findCountry(indi.Country).css('fill', warningColour);
+                    } else {
+                        findCountry(indi.Country).css('fill', dangerColour);
+                    }
+                    break;
+                case 'SLE_1T6': //-school life expectancy 16 & up (tertiary) ,13-15 (secondary), 8-12 (lwr secondary), 7yrs & less (primary)
+                    if ( indi.Value >= 16 ) {
+                        findCountry(indi.Country).css('fill', successColour);
+                    } else if (indi.Value < 16 && indi.Value >= 13 ) {
+                        findCountry(indi.Country).css('fill', warningColour);
+                    } else if (indi.Value < 13 && indi.Value >= 8 ) {
+                        findCountry(indi.Country).css('fill', warningColour);
+                    } else {
+                        findCountry(indi.Country).css('fill', dangerColour);
+                    }
+                    break;
+                case 'GER_1_GPI':
+                case 'GER_12_GPI':
+                case 'GER_23_GPI':
+                    //-GPI equality between 0.97 && 1.03. 0.96 & down == inequalities against girls, 1.4 & above = disadvantage against boys
+                    //lateral slider
+                    break;
+                
+                case 'OFST_1_CP':
+                case 'ROFST_1_CP':
+                case 'OFST_2_CP':
+                case 'ROFST_2_CP': //-out of school data. 0-9% is great, 10-19, 20-29, up to 39% - 40% and above is red
+                    if ( indi.Value < 10 ) {
+                        findCountry(indi.Country).css('fill', successColour);
+                    } else if (indi.Value >= 16 && indi.Value < 13 ) {
+                        findCountry(indi.Country).css('fill', warningColour);
+                    } else if (indi.Value >= 13 && indi.Value < 40 ) {
+                        findCountry(indi.Country).css('fill', warningColour);
+                    } else {
+                        findCountry(indi.Country).css('fill', dangerColour);
+                    }
+                    break;
+                default:
+                    alert(indi.Country);
+            }
+            
+            //$('#queryResult').text('Country: ' + indi.Country + ', Indicator: ' + $('#indicatorSelect').find('option[value="'+indi.Indicator+'"]').text()  + ', Value: ' + indi.Value);
+        });
+    }
+       
 
         //d3.json('countries.json', function(error,data) {
         //    if (error) return console.warn(error);
@@ -196,14 +301,19 @@ $(document).ready(function () {
             })
         })
 
+    //helper funcs
+    findCountry = function(ISO) {
+        var bubbles = $('.datamaps-bubble');
+        var foundCountry;
+        $.each(bubbles, function (i, bubble) {
+            var bubbleInfo = JSON.parse( $(bubble).attr('data-info') );
+            if ( bubbleInfo['name'] == ISO ) {
+                foundCountry = $(bubble);
+            } else {
+                return;
+            }
+        })
+        return foundCountry;
+    }
 
 })
-
-//- Gross enrollment ratios (all) 100% - 120% == overage students, afterwards, 10% intervals down
-//to 50%. Below 50% is all red
-//- Adjusted net enrollment 97-100 == great, everyone enrolled. 90 - 96 = yellow, 10% intervals doen to 50%
-//-literacy for adult and youth. %90-100, 10%increments down, 50 & Below
-//-school life expectancy 16 & up (tertiary) ,13-15 (secondary), 8-12 (lwr secondary), 7yrs & less (primary)
-//-GPI equality between 0.97 && 1.03. 0.96 & down == inequalities against girls, 1.4 & above = disadvantage against boys
-//lateral slider
-//-out of school data. 0-9% is great, 10-19, 20-29, up to 39% - 40% and above is red
